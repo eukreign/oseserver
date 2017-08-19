@@ -1,48 +1,65 @@
 version: '2'
 services:
 
-  frontend:
-    build:
-      context: opensourceecology.org
-    ports:
-      - "80:80"
-
-  osehub:
-    image: eukreign/osehub
+  production:
+    image: osedev/app:production
     environment:
+      LANG: en_US.UTF-8
+      DJANGO_SETTINGS_MODULE: ose.settings.production
+      VIRTUAL_PROTO: uwsgi
+      VIRTUAL_HOST: osedev.org
+      LETSENCRYPT_HOST: osedev.org
+      LETSENCRYPT_EMAIL: lex@damoti.com
+    expose:
+      - "80"
+    labels:
+      - "io.shipmaster.deploy"
+    volumes:
+      - /var/lib/ose/production/media:/media
+
+  sandbox:
+    image: osedev/app:sandbox
+    environment:
+      LANG: en_US.UTF-8
       DJANGO_SETTINGS_MODULE: ose.settings.sandbox
-
-  wiki:
-    build:
-      context: mediawiki 
-    environment:
-      - MEDIAWIKI_SITE_SERVER=//wiki.mernok.io
-      - MEDIAWIKI_SITE_NAME=OSE Wiki
-      - MEDIAWIKI_SITE_LANG=en
-      - MEDIAWIKI_ADMIN_USER=admin
-      - MEDIAWIKI_ADMIN_PASS=a-very-long-password
-      - MEDIAWIKI_UPDATE=true
-      - MEDIAWIKI_VERSION=1.25.3
-      - MEDIAWIKI_DB_USER=root
-      - MEDIAWIKI_DB_PASSWORD=not-very-secret
-      - MEDIAWIKI_DB_HOST=mysql
-      - MEDIAWIKI_RESTBASE_URL=http://mediawiki-node-services/localhost/v1
-
-  mediawiki-node-services:
-    image: wikimedia/mediawiki-node-services
+      VIRTUAL_PROTO: uwsgi
+      VIRTUAL_HOST: sandbox.osedev.org
+      LETSENCRYPT_HOST: sandbox.osedev.org
+      LETSENCRYPT_EMAIL: lex@damoti.com
+    expose:
+      - "80"
+    labels:
+      - "io.shipmaster.deploy"
     volumes:
-      - /tmp/mediawiki-node-services:/data
-    environment:
-      - MEDIAWIKI_API_URL=http://wiki/api.php
+      - /var/lib/ose/sandbox/media:/media
 
-  postgres:
-    build:
-      context: postgres
-
-  mysql:
-    image: mariadb
-    environment:
-      MYSQL_ROOT_PASSWORD: not-very-secret
-    volumes:
-      - ${PWD}/1-wiki-dump.sql:/docker-entrypoint-initdb.d/1-wiki-dump.sql
-      - ${PWD}/2-wiki-clean.sql:/docker-entrypoint-initdb.d/2-wiki-clean.sql
+#  wiki:
+#    build:
+#      context: mediawiki 
+#    environment:
+#      - MEDIAWIKI_SITE_SERVER=//wiki.mernok.io
+#      - MEDIAWIKI_SITE_NAME=OSE Wiki
+#      - MEDIAWIKI_SITE_LANG=en
+#      - MEDIAWIKI_ADMIN_USER=admin
+#      - MEDIAWIKI_ADMIN_PASS=a-very-long-password
+#      - MEDIAWIKI_UPDATE=true
+#      - MEDIAWIKI_VERSION=1.25.3
+#      - MEDIAWIKI_DB_USER=root
+#      - MEDIAWIKI_DB_PASSWORD=not-very-secret
+#      - MEDIAWIKI_DB_HOST=mysql
+#      - MEDIAWIKI_RESTBASE_URL=http://mediawiki-node-services/localhost/v1
+#
+#  mediawiki-node-services:
+#    image: wikimedia/mediawiki-node-services
+#    volumes:
+#      - /tmp/mediawiki-node-services:/data
+#    environment:
+#      - MEDIAWIKI_API_URL=http://wiki/api.php
+#
+#  mysql:
+#    image: mariadb
+#    environment:
+#      MYSQL_ROOT_PASSWORD: not-very-secret
+#    volumes:
+#      - ${PWD}/1-wiki-dump.sql:/docker-entrypoint-initdb.d/1-wiki-dump.sql
+#      - ${PWD}/2-wiki-clean.sql:/docker-entrypoint-initdb.d/2-wiki-clean.sql
